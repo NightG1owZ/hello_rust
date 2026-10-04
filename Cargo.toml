@@ -1,0 +1,183 @@
+[package]
+name = "hello_rust"
+version = "0.1.0"
+edition = "2024"
+description = "Rust 系统学习教程：18 门课程（src/tutorial）+ 学习指南 + 测试驱动考核（assessments）"
+# 关闭 src/bin 自动发现，课程文件统一显式注册（src/tutorial 下的 18 门课程）
+autobins = false
+# 关闭 tests/ 自动发现，考核用例统一显式注册（assessments/ 目录）
+autotests = false
+
+[dependencies]
+
+# ===== 考核框架库（assessments/ 专用，零第三方依赖，仅标准库）=====
+# 18 个考核目标与报告生成器都依赖它；课程文件（src/ 下的 [[bin]]）与它无关。
+[lib]
+name = "assessment_harness"
+path = "assessments/harness/lib.rs"
+
+# 原始入门示例
+[[bin]]
+name = "hello"
+path = "src/main.rs"
+
+# ===== Rust 学习课程：按学习顺序编号，二进制名与文件名保持一致 =====
+[[bin]]
+name = "lesson_01_variables_mutability"
+path = "src/tutorial/lesson_01_variables_mutability.rs"
+
+[[bin]]
+name = "lesson_02_data_types"
+path = "src/tutorial/lesson_02_data_types.rs"
+
+[[bin]]
+name = "lesson_03_functions"
+path = "src/tutorial/lesson_03_functions.rs"
+
+[[bin]]
+name = "lesson_04_control_flow"
+path = "src/tutorial/lesson_04_control_flow.rs"
+
+[[bin]]
+name = "lesson_05_ownership_borrowing"
+path = "src/tutorial/lesson_05_ownership_borrowing.rs"
+
+[[bin]]
+name = "lesson_06_structs"
+path = "src/tutorial/lesson_06_structs.rs"
+
+[[bin]]
+name = "lesson_07_enums_pattern_matching"
+path = "src/tutorial/lesson_07_enums_pattern_matching.rs"
+
+[[bin]]
+name = "lesson_08_collections"
+path = "src/tutorial/lesson_08_collections.rs"
+
+[[bin]]
+name = "lesson_09_packages_modules"
+path = "src/tutorial/lesson_09_packages_modules.rs"
+
+[[bin]]
+name = "lesson_10_error_handling"
+path = "src/tutorial/lesson_10_error_handling.rs"
+
+[[bin]]
+name = "lesson_11_generics"
+path = "src/tutorial/lesson_11_generics.rs"
+
+[[bin]]
+name = "lesson_12_traits"
+path = "src/tutorial/lesson_12_traits.rs"
+
+[[bin]]
+name = "lesson_13_lifetimes"
+path = "src/tutorial/lesson_13_lifetimes.rs"
+
+# ===== 第五阶段课程（14~18，衔接 Web 实战）：序号与基础课程连续，规范完全一致 =====
+[[bin]]
+name = "lesson_14_closures"
+path = "src/tutorial/lesson_14_closures.rs"
+
+[[bin]]
+name = "lesson_15_iterators"
+path = "src/tutorial/lesson_15_iterators.rs"
+
+[[bin]]
+name = "lesson_16_smart_pointers"
+path = "src/tutorial/lesson_16_smart_pointers.rs"
+
+[[bin]]
+name = "lesson_17_threads_channels"
+path = "src/tutorial/lesson_17_threads_channels.rs"
+
+[[bin]]
+name = "lesson_18_macros"
+path = "src/tutorial/lesson_18_macros.rs"
+
+# ===== 考核环节（assessments/）：模块路径与课程一一对应，测试名与课程文件同名 =====
+# 每个考核文件都是一个独立的测试目标（libtest），可单独运行：
+#   cargo test --test lesson_05_ownership_borrowing
+# 全部一起运行（考核脚本内部使用）：cargo test --no-fail-fast
+[[test]]
+name = "lesson_01_variables_mutability"
+path = "assessments/lesson_01_variables_mutability.rs"
+
+[[test]]
+name = "lesson_02_data_types"
+path = "assessments/lesson_02_data_types.rs"
+
+[[test]]
+name = "lesson_03_functions"
+path = "assessments/lesson_03_functions.rs"
+
+[[test]]
+name = "lesson_04_control_flow"
+path = "assessments/lesson_04_control_flow.rs"
+
+[[test]]
+name = "lesson_05_ownership_borrowing"
+path = "assessments/lesson_05_ownership_borrowing.rs"
+
+[[test]]
+name = "lesson_06_structs"
+path = "assessments/lesson_06_structs.rs"
+
+[[test]]
+name = "lesson_07_enums_pattern_matching"
+path = "assessments/lesson_07_enums_pattern_matching.rs"
+
+[[test]]
+name = "lesson_08_collections"
+path = "assessments/lesson_08_collections.rs"
+
+[[test]]
+name = "lesson_09_packages_modules"
+path = "assessments/lesson_09_packages_modules.rs"
+
+[[test]]
+name = "lesson_10_error_handling"
+path = "assessments/lesson_10_error_handling.rs"
+
+[[test]]
+name = "lesson_11_generics"
+path = "assessments/lesson_11_generics.rs"
+
+[[test]]
+name = "lesson_12_traits"
+path = "assessments/lesson_12_traits.rs"
+
+[[test]]
+name = "lesson_13_lifetimes"
+path = "assessments/lesson_13_lifetimes.rs"
+
+[[test]]
+name = "lesson_14_closures"
+path = "assessments/lesson_14_closures.rs"
+
+[[test]]
+name = "lesson_15_iterators"
+path = "assessments/lesson_15_iterators.rs"
+
+[[test]]
+name = "lesson_16_smart_pointers"
+path = "assessments/lesson_16_smart_pointers.rs"
+
+[[test]]
+name = "lesson_17_threads_channels"
+path = "assessments/lesson_17_threads_channels.rs"
+
+[[test]]
+name = "lesson_18_macros"
+path = "assessments/lesson_18_macros.rs"
+
+# ===== 考核报告生成器（读账本 → 生成学习评估报告 + 学习进度对比）=====
+[[bin]]
+name = "assessment_report"
+path = "assessments/bin/assessment_report.rs"
+
+# ===== 参考答案工具箱（校验 / 应用 / 还原 assessments/solutions/ 下的参考答案）=====
+# cargo test 不会编译参考答案；只有显式运行本工具才会（临时）把它们写进考核文件。
+[[bin]]
+name = "solution_tool"
+path = "assessments/bin/solution_tool.rs"

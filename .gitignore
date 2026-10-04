@@ -1,0 +1,12 @@
+/target
+
+# ===== 考核环节（assessments/）的学员个人数据：不进版本库 =====
+# 账本 / 历史 / 会话文件 / 原始测试输出
+/assessments/report/data/
+# 每次运行生成的学习评估报告与摘要（样例报告放在 assessments/report/samples/ 里，会进版本库）
+/assessments/report/assessment_report.md
+/assessments/report/summary.json
+# 参考答案工具在 --apply 时保存的骨架备份（临时文件，--restore 用；不进版本库）
+/assessments/solutions/.backup/
+# 参考答案验证（--verify）的隔离账本与日志
+/target/solution-verify/

@@ -1,0 +1,58 @@
+# ============================================================================
+# demoweb 默认配置
+#
+# 优先级（从低到高）：代码内置默认值 → 本文件 → 环境变量
+#
+# 环境变量覆盖规则：前缀 APP_ + 路径用 __ 分隔，例如
+#   server.bind_address  →  APP_SERVER__BIND_ADDRESS=0.0.0.0:8080
+#   jwt.secret           →  APP_JWT__SECRET=<强随机字符串>
+#   database.url         →  APP_DATABASE__URL=sqlite://data/app.db?mode=rwc
+#
+# 提示：本文件**不要**写任何真实密钥，它会被提交进版本库。
+# ============================================================================
+
+# 运行环境：development / test / production
+# production 下会拒绝使用内置示例 JWT 密钥，并收紧 CORS 白名单
+environment = "development"
+
+[server]
+# 监听地址。部署到容器时用 0.0.0.0:8080 之类，进程内默认只监听本机更安全
+bind_address = "127.0.0.1:3000"
+# 单请求处理超时（秒）：超过后中间件返回 408，释放连接资源
+request_timeout_secs = 15
+# 请求体上限（字节）：1 MiB，防止超大 body 打爆内存
+max_body_bytes = 1048576
+# 优雅停机等待在途请求完成的最长时间（秒）
+shutdown_timeout_secs = 10
+
+[database]
+# 默认使用 SQLite 内存库：零外部依赖，进程退出即清空，非常适合学习与测试。
+#
+# 想持久化，改成下面这行（并确保 max_connections > 1 以发挥连接池作用）：
+#   url = "sqlite://data/app.db?mode=rwc"
+url = "sqlite::memory:"
+# SQLite 内存库的每条连接都是**独立数据库**，因此内存模式必须为 1；
+# 使用文件库时可以调大到 5~10。
+max_connections = 1
+# 从连接池获取连接的最长等待时间（秒）
+acquire_timeout_secs = 5
+
+[jwt]
+# 签名密钥。**生产环境必须通过环境变量注入**：
+#   APP_JWT__SECRET=$(openssl rand -base64 48)
+# 开发环境的默认值仅用于本地跑通，长度需 ≥16 字符
+secret = "dev-only-insecure-secret-change-me"
+# 令牌有效期（小时）
+expires_hours = 24
+# 签发者，写入 JWT 的 iss 声明，用于多服务间区分令牌
+issuer = "demoweb"
+
+[log]
+# 日志过滤规则，语法同 RUST_LOG；也可用环境变量 RUST_LOG 临时覆盖
+level = "info,demoweb=debug,tower_http=info"
+# 是否输出 JSON 格式（生产环境交给日志采集系统时打开）
+json = false
+# 是否同时写入文件（logs/app.log.YYYY-MM-DD，按天滚动）
+file_enabled = false
+# 日志文件目录
+dir = "logs"

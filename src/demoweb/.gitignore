@@ -1,0 +1,22 @@
+# ---- Rust / Cargo 构建产物 ----
+/target/
+**/*.rs.bk
+*.pdb
+
+# ---- 本地配置与密钥（绝不提交）----
+.env
+.env.local
+config/local.toml
+config/*.local.toml
+
+# ---- 运行时数据与日志 ----
+data/
+logs/
+*.sqlite
+*.sqlite3
+*.db
+
+# ---- 编辑器 ----
+.idea/
+.vscode/
+*.swp

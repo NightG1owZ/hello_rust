@@ -1,0 +1,99 @@
+[package]
+name = "demoweb"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+description = "基于 Axum 的企业级简易 Web 应用：分层架构、配置管理、错误处理、日志、异步数据库与并发"
+license = "MIT"
+
+# ============================================================================
+# 依赖说明（每个依赖都标注了它在项目里承担的职责，便于对照学习）
+# ============================================================================
+[dependencies]
+# ---- Web 框架与中间件 ----
+axum = { version = "0.8", features = ["macros"] }   # HTTP 路由 / 提取器 / 响应构建
+tower = "0.5"                                        # 中间件抽象（Service trait）
+tower-http = { version = "0.6", features = [         # 官方中间件集合
+    "trace",        # 每个请求生成 tracing span，串联访问日志
+    "request-id",   # 为每个请求生成/透传 x-request-id
+    "cors",         # 跨域支持
+    "limit",        # 请求体大小限制（防止超大 body 打爆内存）
+    "timeout",      # 请求超时保护
+] }
+
+# ---- 异步运行时与并发 ----
+tokio = { version = "1", features = [
+    "rt-multi-thread",  # 多线程调度器：充分利用多核
+    "macros",           # #[tokio::main] / #[tokio::test]
+    "net",              # TcpListener
+    "signal",           # Ctrl+C 优雅停机
+    "time",             # 超时、定时任务
+    "sync",             # 异步同步原语（本项目用于演示后台清理任务）
+] }
+
+# ---- 异步数据库 ----
+sqlx = { version = "0.8", default-features = false, features = [
+    "runtime-tokio",    # 与 tokio 运行时集成
+    "sqlite",           # SQLite 驱动（内存库，零外部依赖，开箱即用）
+    "macros",           # query! 等宏
+    "migrate",          # 迁移管理
+    "chrono",           # 时间类型映射
+    "json",             # JSON 列支持
+] }
+
+# ---- 序列化 / 校验 ----
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+validator = { version = "0.20", features = ["derive"] }   # 请求体声明式校验
+
+# ---- 配置管理 ----
+config = { version = "0.15", default-features = false, features = ["toml", "json"] }
+dotenvy = "0.15"                       # 加载 .env
+
+# ---- 日志与可观测性 ----
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt", "json", "time"] }
+tracing-appender = "0.2"               # 日志文件滚动
+
+# ---- 安全：密码哈希与 JWT ----
+bcrypt = "0.17"                        # 密码哈希（自带随机盐）
+jsonwebtoken = "9"                     # JWT 签发与校验
+uuid = { version = "1", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+
+# ---- 错误处理 ----
+thiserror = "2"                        # 领域错误类型
+anyhow = "1"                           # 启动阶段/边界处的错误聚合
+
+# ---- 异步 trait 支持 ----
+# 原生 async fn in trait（AFIT）自 Rust 1.75 起稳定，但作为 `dyn Trait` 使用时
+# 仍不满足对象安全（object safety），无法放进 `Arc<dyn UserRepository>`。
+# `async-trait` 宏会自动把 async fn 改写为返回 `Pin<Box<dyn Future>>`，
+# 从而让 trait 可用于动态分发——这是本项目实现"依赖倒置"的关键。
+async-trait = "0.1"
+
+[dev-dependencies]
+reqwest = { version = "0.12", default-features = false, features = ["json"] }  # 集成测试发真实 HTTP
+tokio = { version = "1", features = ["full"] }
+
+# 开发环境优化：依赖用 O2 编译（加速 bcrypt/sqlx 等 CPU 密集库），自己的代码保持快速编译
+[profile.dev.package."*"]
+opt-level = 2
+
+# ----------------------------------------------------------------------------
+# 针对 libsqlite3-sys 的构建规避（本机 MinGW gcc 8.1.0 的编译器缺陷）
+#
+# 现象：sqlite3-sys 以 bundled 方式编译 sqlite3.c（约 25 万行的单文件 C 源码）时，
+#       gcc 8.1.0 在生成 DWARF 调试信息阶段崩溃（dwarf2out.c 内部错误 ICE）。
+# 处理：只把该依赖的调试信息关掉（debug = false），并降低优化等级，
+#       业务代码仍保留完整调试信息，不影响断点调试体验。
+# 说明：若你使用 MSVC 工具链或较新的 MinGW-w64（gcc 12+），可删除本节。
+# ----------------------------------------------------------------------------
+[profile.dev.package.libsqlite3-sys]
+debug = false
+opt-level = 1
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = true
